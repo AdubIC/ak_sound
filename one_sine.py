@@ -2,7 +2,7 @@
 
 import numpy as np
 import scipy.io.wavfile as wav
-import sounddevice as sd
+# import sounddevice as sd
 import time
 import matplotlib.pyplot as plt
 
@@ -18,7 +18,7 @@ def get_times(duration_s=1.0, sample_rate=44100):
     ts = np.linspace(0., duration_s, round(duration_s * sample_rate))
     return ts
 
-
+# why do I worry about x values an not just assume 0 to duration * samples
 def create_sine_wave(duration=1.0, freq=440, amp=1.0):
     ts = get_times(duration)
     samples = amp * np.sin(np.pi * 2 * freq * ts)
@@ -26,16 +26,18 @@ def create_sine_wave(duration=1.0, freq=440, amp=1.0):
 
 
 def normalize_data(data):
+    # make sure amplitude is not 0
     max_amp = max(max(data), abs(min(data)))
     normal_data = data / max_amp
     return normal_data
 
-
+# why not do in one step with normalize
 def quantize_wave(data, samp_rate=44100):
     # make amplitude half of the int16 min/max
     if max(data) > 1:
         data = normalize_data(data)
     # check to see if normalized to -1 to 1
+    # keep this close to max rather than .5
     desired_amplitude = np.iinfo(np.int16).max * .5
     samples = np.int16(desired_amplitude * data)
     return samples
@@ -73,9 +75,9 @@ if __name__ == '__main__':
     print(f"wave from file y vals: {min(wave_from_file)} - {max(wave_from_file)}")
 
     # play wave from original and from file
-    sd.play(int_data, SAMPLES_PER_SEC)
-    time.sleep(DURATION_S)
-    sd.play(wave_from_file, samp_rate)
-    time.sleep(dur_s)
-    sd.stop()
+#    sd.play(int_data, SAMPLES_PER_SEC)
+ #   time.sleep(DURATION_S)
+ #   sd.play(wave_from_file, samp_rate)
+ #   time.sleep(dur_s)
+ #   sd.stop()
 
