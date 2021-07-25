@@ -1,56 +1,67 @@
-# Importing Libraries using import function
+# example from matplot.lib.org/stable/gallery/widgets/slider_demo.html
 import numpy as np
 import matplotlib.pyplot as plt
-from matplotlib.widgets import Slider
+from matplotlib.widgets import Slider, Button
 
-# Setting Plot and Axis variables as subplots()
+def plot_wave(sec, amplitude, frequency):
+    return amplitude * np.sin(2 * np.pi * frequency * sec)
+
+
+sec = np.linspace(0, 1, 1000)
+
+# Initial parameters
+init_amplitude = 5
+init_frequency = 3
+
+
 # function returns tuple(fig, ax)
 fig, ax = plt.subplots()
+line, = plt.plot(sec, plot_wave(sec, init_amplitude, init_frequency), lw=2)
+ax.set_xlabel('Time [s]')
 
-# Adjust the bottom size according to the
-# requirement of the user
-plt.subplots_adjust(bottom=0.25)
+axcolor = 'lightgoldenrodyellow'
+ax.margins(x=0)
 
-# Set the x and y axis to some dummy data
-t = np.arange(0.0, 1.0, 0.001)
-# Initial values of amplitude anf frequency
-# are denoted by a0 and f0
-a0 = 6
-f0 = 3
-s = a0 * np.sin(2 * np.pi * f0 * t)
+# Adjust the bottom to make room for sliders
+plt.subplots_adjust(left=0.25, bottom=0.25)
 
-# plot the x and y using plot function
-Plot, = plt.plot(t, s, lw=3, color='green')
-plt.axis([0, 1, -10, 10])
+# horizontal slider for frequency
+axfreq = plt.axes([0.25, 0.1, 0.65, 0.03], facecolor=axcolor)
+freq_slider = Slider(
+    ax=axfreq,
+    label='Frquency [Hz]',
+    valmin=0.1,
+    valmax=30,
+    valinit=init_frequency,
+)
 
-# Choose the Slider color
-axcolor = "White"
+# vertical slider for amplitude
+axamp = plt.axes([0.1, 0.25, 0.0225, 0.63], facecolor=axcolor)
+amp_slider = Slider(
+    ax=axamp,
+    label="Amplitude",
+    valmin=0,
+    valmax=10,
+    valinit=init_amplitude,
+    orientation="vertical"
+)
 
-# Set the frequency and amplitude axis
-frequency_axis = plt.axes([0.25, 0.1, 0.65, 0.03],
-                          facecolor=axcolor)
-amplitude_axis = plt.axes([0.25, 0.15, 0.65, 0.03],
-                          facecolor=axcolor)
-
-# Set the slider for frequency and amplitude
-frequency_slider = Slider(frequency_axis, 'Freq',
-                          0.1, 30.0, valinit=f0)
-amplitude_slider = Slider(amplitude_axis, 'Amp',
-                          0.1, 10.0, valinit=a0)
-
-
-# update() function to change the graph when the
-# slider is in use
+# function to call when slider value changes
 def update(val):
-    amp = amplitude_slider.val
-    freq = frequency_slider.val
-    Plot.set_ydata(amp * np.sin(2 * np.pi * freq * t))
+    line.set_ydata(plot_wave(sec, amp_slider.val, freq_slider.val))
+    fig.canvas.draw_idle()
 
+# register update function with each slider
+freq_slider.on_changed(update)
+amp_slider.on_changed(update)
 
-# update function called using on_changed() function
-# for both frequency and amplitude
-frequency_slider.on_changed(update)
-amplitude_slider.on_changed(update)
+# Create a widget button to reset sliders to initial values
+resetax = plt.axes([0.8, 0.025, 0.1, 0.04])
+button = Button(resetax, 'Reset', color=axcolor, hovercolor='0.975')
 
-# Display the plot
+def reset(event):
+    freq_slider.reset()
+    amp_slider.reset()
+button.on_clicked(reset)
+
 plt.show()
